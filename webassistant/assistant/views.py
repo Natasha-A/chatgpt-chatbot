@@ -1,16 +1,14 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-
 
 # Home View
 def home(request):
-    return HttpResponse('The Home Page')
+    return render(request, 'assistant/home.html')
   
   
 def new_chat(request):
-  return HttpResponse('New Chat Page')
+  return render(request, 'assistant/base.html')
 
 
 # Error View
 def error_handler(request):
-    return HttpResponse('404 Page')
+    return render(request, 'assistant/404.html')
