@@ -1,14 +1,70 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+import openai
+from .secret_key import API_KEY
+
+openai.api_key = API_KEY
+
 
 # Home View
 def home(request):
-    return render(request, 'assistant/home.html')
-  
-  
+    try:
+        # if the session does not have a messages key, create one
+        if 'messages' not in request.session:
+            request.session['messages'] = [
+                {"role": "system",
+                 "content": "You are now chatting with a user, provide them with comprehensive, short and concise answers."},
+            ]
+        if request.method == 'POST':
+            # get the prompt from the form
+            prompt = request.POST.get('prompt')
+            print("Q:" + str(prompt))
+            # temperature is the randomness of the response under the AI context
+            temperature = float(request.POST.get('temperature', 0.1))
+            # append the prompt to the messages list
+            request.session['messages'].append({"role": "user", "content": prompt})
+            # set the session as modified
+            request.session.modified = True
+            # call the openai API
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=request.session['messages'],
+                temperature=temperature,
+                # we need to buyyyyyy tokens
+                max_tokens=1000,
+            )
+            # format the response
+            formatted_response = response['choices'][0]['message']['content']
+            # append the response to the messages list
+            request.session['messages'].append({"role": "assistant", "content": formatted_response})
+            request.session.modified = True
+            # redirect to the home page
+            context = {
+                'messages': request.session['messages'],
+                'prompt': '',
+                'temperature': temperature,
+            }
+            return render(request, 'assistant/home.html', context)
+        else:
+            # if the request is not a POST request, render the home page
+            context = {
+                'messages': request.session['messages'],
+                'prompt': '',
+                'temperature': 0.1,
+            }
+            return render(request, 'assistant/home.html', context)
+    except Exception as e:
+        print(e)
+        # if there is an error, redirect to the error handler
+        return redirect('error_handler')
+
+
+# this is called when the user clicks the "New Chat+" button.
 def new_chat(request):
-  return render(request, 'assistant/base.html')
+    # clear the messages list
+    request.session.pop('messages', None)
+    return redirect('home')
 
 
-# Error View
+# this is the view for handling errors
 def error_handler(request):
     return render(request, 'assistant/404.html')
