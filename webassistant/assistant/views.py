@@ -29,7 +29,6 @@ def home(request):
                 model="gpt-3.5-turbo",
                 messages=request.session['messages'],
                 temperature=temperature,
-                # we need to buyyyyyy tokens
                 max_tokens=1000,
             )
             # format the response

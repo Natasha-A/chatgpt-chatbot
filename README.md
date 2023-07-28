@@ -1,2 +1,2 @@
 # chatgpt-chatbot
-# API key: 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
+# API key: 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
