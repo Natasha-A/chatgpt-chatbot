@@ -1,38 +1,79 @@
 {% extends 'assistant/base.html' %}
 {% block title %} Home {% endblock %}
 {% block content %}
-<div class="row justify-content-center my-4">
-    <div class="col-md-7 mt-4">
-        <div class="card">
-            <div class="card-header text-left">
-              <h1 style='font-size: 40pt'>🤖</h1>
-              <h1>ChatGPT Chatbot</h1>
-            </div>
-            <div class="card-body">
-              <div class="d-flex justify-content-end">
-                <button type="button" class="btn btn btn-outline-danger mb-3" onclick="location.href='{% url 'new_chat' %}'">New Chat +</button>
-              </div>
-              <div class="chat-history mb-3">
-                {% for message in messages %}
-                  <div class="card mb-2 {% if message.role == 'assistant' %}bg-success text-white{% endif %}">
-                    <div class="card-body p-2">
-                      <strong>{{ message.role|title }}:</strong> {{ message.content|linebreaksbr }}
-                    </div>
-                  </div>
-                {% endfor %}
-              </div>
-              <form action="." method="POST">
-                <!-- this secures the form from malicious attacks during submission -->
-                {% csrf_token %}
-                <input class="form-control mb-2" required type="text" autofocus="autofocus" name="prompt" value="{{ prompt }}" id="">
-                <label for="temperature" class="form-label">Temperature:</label>
-                <input class="form-control mb-2" type="number" step="0.01" min="0" max="2" name="temperature" value="{{ temperature }}" id="temperature">
-                <button class="btn btn-primary fw-bold" type="submit">
-                     GENERATE
-                </button>
-              </form>
-            </div>
+<div class="d-flex justify-content-center ">
+  <div class="col-lg-9">
+    <div class="card">
+      <div class="card-header">
+        <h1 style='font-size: 20pt'>🤖Chatbot with ChatGPT </h1>
+      </div>
+
+      <div class="card-body">
+        <div class="d-flex justify-content-center">
+          <button type="button" class="btn-newchat btn" onclick="location.href='{% url 'new_chat' %}'"> + New Chat</button>
         </div>
+
+        <div class="chat-history">
+          <div>
+            
+            {% for message in messages %}
+            <div class=" 
+                  {% if message.role == 'system' %}  system {% endif %}
+                  {% if message.role == 'user' %} user{% endif %}
+                  {% if message.role == 'assistant' %} assist {% endif %}">
+              <div class="card-body p-1 ">
+                {% if message.role == 'system' %}
+                <div>
+                  <span class="material-symbols-rounded">robot</span>
+                  <strong>Assistant:</strong>
+                  <div>Hi! Welcome to Chatbot! Ask Any Questions</div>
+                </div>
+                {% endif %}
+                {% if message.role == 'user' %}
+                <div class="user-text">
+                  <span class="material-symbols-rounded">person</span>
+                  <strong>{{ message.role|title }}:</strong>
+                  <div>{{ message.content|linebreaksbr }}</div>
+                </div>
+                {% endif %}
+                {% if message.role == 'assistant' %}
+                <span class="material-symbols-rounded">robot</span>
+                <strong>{{ message.role|title }}:</strong>
+                <div>{{ message.content|linebreaksbr }}</div>
+                {% endif %}
+                
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      <div class="parent-input">
+        <div class="chat-input">
+          <form action="." method="POST">
+            <!-- this secures the form from malicious attacks during submission -->
+            {% csrf_token %}
+            <div class="row">
+              <label for="temperature" style='font-size: 9pt' class="form-label">Temperature</label>
+              <div class="col-2">
+                <input class="form-control mb-2" type="number" step="0.01" min="0" max="2" name="temperature"
+                  value="{{ temperature }}" id="temperature">
+              </div>
+              <div class="col-8">
+                <input class="form-control mb-2" required type="text" autofocus="autofocus" name="prompt"
+                  placeholder="Ask any thing" value="{{ prompt }}" id="">
+              </div>
+              <div class="col-2">
+                <button id="send-btn" class="material-symbols-rounded" type="submit">
+                  Send
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+        </div>
+
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}
